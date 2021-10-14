@@ -33,7 +33,7 @@ public class Universal_Hashing extends Open_Addressing{
      */
 	@Override
     public int probe(int key, int i) {
-		int mod = power2(r);
+		int mod = power2(this.r);
 		int h = ((((this.a) * key) + this.b) % this.p) % this.m ;
 
 		return (h + i) % mod;
@@ -47,10 +47,10 @@ public class Universal_Hashing extends Open_Addressing{
     public int insertKeyResize(int key) {
 		int collisions = 0;
 
-		collisions += this.insertKey(key);
+		collisions += this.insertKey(key); //We want to return the number of collisions encountered prior to resize
 
 		//if the load factor is greater than the maximum load factor, then the hash table array should be resized
-		if (this.size/this.m > MAX_LOAD_FACTOR){
+		if ((float) this.size/this.m > MAX_LOAD_FACTOR){
 
 			int[] tempTable = new int[this.Table.length];
 			for(int i=0; i<tempTable.length; i++){tempTable[i] = this.Table[i];} //Copy elements in hash table over to a temporary array
@@ -59,6 +59,7 @@ public class Universal_Hashing extends Open_Addressing{
 			//generate new values for fields of the hash table so that the new hashtable can be built
 			this.w = this.w + 2;
 			this.r = (int) (this.w - 1) / 2 + 1;
+			this.m = power2(this.r);
 
 			//compute a new value for prime number p
 			int temp = this.m+1; // m is even, so temp is odd here
@@ -73,16 +74,14 @@ public class Universal_Hashing extends Open_Addressing{
 			for(int i=0; i<this.m; i++){ this.Table[i] = -1; }
 
 			for(int i = 0; i < tempTable.length; i++){
-				if (tempTable[i] >= 0){
+				if (i < tempTable.length && tempTable[i] >= 0){
 					//compute new hash value for the key in the old array and insert back into bigger array
 					//with new hash value that is computed with the new values for A, w, r, and m
 					this.insertKey(tempTable[i]);
 				}
 			}
 
-
 		}
-
 		return collisions;
     }
 }

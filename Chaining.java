@@ -57,12 +57,8 @@ public class Chaining {
 		int collisions = 0;
 		int hashVal = chain(key);
 
-		//count the number of collisions before inserting
-		for(int i=0; i< (this.Table.get(i)).size(); i++){
-			if(this.Table.get(hashVal).get(i) == key || this.Table.get(hashVal).get(i) != 0){
-				collisions += 1;
-			}
-		}
+		//Collisions are simply the amount of other keys present in the subArrayList at the hashValue index
+		collisions = this.Table.get(hashVal).size();
 
 		//Add the key to the slot that corresponds to the hash value computed by chain(k)
 		this.Table.get(hashVal).add(key);

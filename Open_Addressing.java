@@ -50,8 +50,8 @@ public class Open_Addressing {
 	 */
 	public int probe(int key, int i) {
 		//Calculate the value of h to compute the probe function g
-		int h = (this.A * key) % ((int) power2(this.w)) >> (this.w - this.r);
-		int mod = power2(r);
+		int h = ((this.A * key) % ((int) power2(this.w))) >> (this.w - this.r);
+		int mod = power2(this.r);
 
 		return (h + i) % this.m;
 	}
@@ -64,11 +64,14 @@ public class Open_Addressing {
 		int hashValue = probe(key, i);
 		int collisions = 0;
 
+
 		//while the hashValue index is not empty, recompute the hashValue to check if the next address is open
 		while(this.Table[hashValue] != -1){
-			//i+=1;
-			hashValue = (probe(key, ++i)) % power2(r);
-			//i += 1;
+			if(collisions == this.m){
+				return collisions;
+			}
+
+			hashValue = (hashValue + probe(key, ++i)) % power2(r);
 			collisions += 1;
 		}
 
@@ -98,7 +101,7 @@ public class Open_Addressing {
 	 */
 	public int[] searchKey(int k) {
 		int[] output;
-		int i = 0; // might need to start at 1
+		int i = 0;
 		int hashValue = probe(k, i);
 		int collisions = 0;
 
@@ -107,14 +110,14 @@ public class Open_Addressing {
 
 			//if the number of collisions is equal to the number of slots in the hash table
 			//we know that the hash table does not contain the key k and we can exit
-			if (collisions == power2(r) || this.Table[hashValue] == -1){
+			if (hashValue < 0 || collisions == power2(r) || this.Table[hashValue] == -1){
 				output = new int[] {-1, collisions};
 				return output;
 			}
 
 			//if the key at index hashValue is not k we want to probe to the next hashValue and say we encountered a collision
 			//i += 1;
-			hashValue = (probe(k, ++i)) % power2(r);
+			hashValue = (hashValue + probe(k, ++i)) % power2(this.r);
 			//i+=1;
 			collisions += 1;
 
@@ -211,8 +214,8 @@ public class Open_Addressing {
 			return output;
 		}
 
-		int i = 0; // might need to start at 1
-		int hashValue = probe(k, i);
+		int i = 0;
+		int hashValue = probe(k, i); //Compute the initial hashValue
 
 		//probe through the hash table to check for the key k
 		while(this.Table[hashValue] != k){
@@ -228,10 +231,7 @@ public class Open_Addressing {
 			}
 
 			//compute new hash value to iterate to the next address in the hash table
-			//i += 1;
-			hashValue = (probe(k, ++i)) % power2(r);
-			//hashValue = (hashValue + probe(k, i)) % power2(r);
-			//i += 1;
+			hashValue = (hashValue + probe(k, ++i)) % power2(r);
 
 		}
 
@@ -257,8 +257,9 @@ public class Open_Addressing {
 		int i = 0;
 		int g = (h + i) % power2(r);
 
+		output[0] = k;
 
-		for(i = 0; i<n; i++){
+		for(i = 1; i<n; i++){
 			g = (h + i) % power2(r);
 			output[i] = ((q * power2(w)) + (((p*power2(r)) + g -i) << (w-r)))/A;
 			p++;
